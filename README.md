@@ -1,2 +1,2 @@
 # warped-stretch
-A MATLAB package for design of warped stretch transform
+A MATLAB package for design of warped stretch transform.
