@@ -15,15 +15,15 @@ df = 0.5/max_t; % Frequency simulation resolution [Hz]
 f = -0.5/dt : df : 0.5/dt; % Frequency samples [Hz]
 f_GD = (f(2:end)+f(1:end-1))/2; % Frequencies of GD samples
 f_GDD = f(2:end-1); % Frequencies of GDD samples
-added_chirp = exp(-1j*1e-13*pi*f.^2*(max_t)) .* exp(+1j*2e-26*pi*f.^3*(max_t));
-
+added_chirp = exp(-1j*1e-13*pi*f.^2*(max_t)) .* exp(+1j*2e-26*pi*f.^3*(max_t)); % Input signal chirp
+asymmetry = true; % Input spectrum asymmetry
 switch 'set spectral shape'
     case 'set temporal shape'
         E_in_t = 1.5e3.*(exp(-((t-7e-12)/1e-12).^2)+0.7*exp(-((t+7e-12)/1e-12).^2)+10*exp(-(t/2e-13).^2)); % Complex envelope of input electric field in time [V/m]
         E_in_f = 1/Fs * added_chirp.*fftshift(fft(E_in_t)); % Complex envelope of input electric field in frequency [V/m/Hz]
         E_in_t = Fs * ifft(ifftshift(E_in_f));
     case 'set spectral shape'
-        E_in_f = added_chirp.*((0.25.*exp(-(f/0.5e12).^2) + (0.5 + 0.5*cos(2*pi*(1/150e9)*f)).*(exp(-((f-1.5e12)/0.15e12).^2)+exp(-((f+1.5e12)/0.15e12).^2))).*1e-8.*exp(1j*2*pi*f*(max_t)));
+        E_in_f = added_chirp.*((0.25.*exp(-(f/0.5e12).^2) + ((0.5 + double(~asymmetry).*0.5*cos(2*pi*(1/150e9)*f)).*exp(-((f-1.5e12)/0.15e12).^2) + (0.5 + 0.5*cos(2*pi*(1/150e9)*f)).*exp(-((f+1.5e12)/0.15e12).^2))).*1e-8.*exp(1j*2*pi*f*(max_t)));
         E_in_t = Fs * ifft(ifftshift(E_in_f));
 end
 E_in_envelope_t = abs(E_in_t); % Envelope of input electric field in time [V/m]
@@ -105,7 +105,7 @@ design_filter_GDD_design_F_ADC = 0.5./(2*pi*design_ADC_BW*design_delta_design_F_
 design_filter_GDD_design_F = max([design_filter_GDD_design_F_DFT; design_filter_GDD_design_F_PD; design_filter_GDD_design_F_ADC]);
 design_dF = mean(diff(design_F));
 shifted_design_filter_GD_design_F = cumsum(design_filter_GDD_design_F).*(2*pi*design_dF);
-design_filter_GD_design_F = shifted_design_filter_GD_design_F - mean(shifted_design_filter_GD_design_F); % Just to force zero freq. GD to zero
+design_filter_GD_design_F = shifted_design_filter_GD_design_F - shifted_design_filter_GD_design_F(value_finder(design_F,0)); % Just to force zero freq. GD to zero
 design_filter_GD_f = interp1(design_F, design_filter_GD_design_F, f, 'linear', 'extrap');
 
 chirp_from_filtered_E_in_design_F = zeros(size(F));
@@ -244,8 +244,8 @@ for filter_index = 1 : N_filters
     input_spectrum_show_range = 0.99*get(fig1_subplot_handles(1,2),'XLim');
     input_spectrum_GD_starts = filter_GD_f_without_chirp(value_finder(f_GD/1e9, input_spectrum_show_range(1)));
     input_spectrum_GD_ends = filter_GD_f_without_chirp(value_finder(f_GD/1e9, input_spectrum_show_range(2)));
-    plot([0 Aquisition_BW Aquisition_BW 0]/1e9, [input_spectrum_GD_starts(1) input_spectrum_GD_starts(1) ...
-        input_spectrum_GD_ends(end) input_spectrum_GD_ends(end)]/1e-9,'-.', 'Color', colors(filter_index+1,:))
+    plot([0 Aquisition_BW Aquisition_BW 0]/1e9, [-input_spectrum_GD_ends(end) -input_spectrum_GD_ends(end) ...
+        -input_spectrum_GD_starts(1) -input_spectrum_GD_starts(1)]/1e-9,'-.', 'Color', colors(filter_index+1,:))
     
     axes(fig1_subplot_handles(1,3)) %#ok<LAXES> % This plots on the first row spectrogram
     input_spectrum_GDD_start_indices = value_finder(f_GDD/1e9, input_spectrum_show_range(1));

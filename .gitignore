@@ -1,2 +1,4 @@
 # OS generated files
 ._*
+# Matlab generated files
+*.asv
