@@ -23,7 +23,7 @@ switch 'set temporal shape'
         E_in_f = 1/Fs * added_chirp.*fftshift(fft(E_in_t)); % Complex envelope of input electric field in frequency [V/m/Hz]
         E_in_t = Fs * ifft(ifftshift(E_in_f));
     case 'set spectral shape'
-        E_in_f = added_chirp.*((0.25.*exp(-(f/0.5e12).^2) + ((0.5 + double(~asymmetry).*0.5*cos(2*pi*(1/150e9)*f)).*exp(-((f-1.5e12)/0.15e12).^2) + (0.5 + 0.5*cos(2*pi*(1/150e9)*f)).*exp(-((f+1.5e12)/0.15e12).^2))).*1e-8.*exp(1j*2*pi*f*(max_t)));
+        E_in_f = added_chirp.*((0.25.*exp(-(f/0.5e12).^2) + ((0.5 + double(~asymmetry).*0.5*cos(2*pi*(1/150e9)*f)).*exp(-((f-(1.5e12 - double(asymmetry).*0.6e12))/0.15e12).^2) + (0.5 + 0.5*cos(2*pi*(1/150e9)*f)).*exp(-((f+1.5e12)/0.15e12).^2))).*1e-8.*exp(1j*2*pi*f*(max_t)));
         E_in_t = Fs * ifft(ifftshift(E_in_f));
 end
 E_in_envelope_t = abs(E_in_t); % Envelope of input electric field in time [V/m]
