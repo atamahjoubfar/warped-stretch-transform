@@ -187,7 +187,7 @@ for filter_index = 1 : N_filters
     plot(f_GDD./1e9, delta_f_total/1e9, '--', 'Color', colors(filter_index+1,:))
     xlabel('Envelope Frequency [GHz]'), ylabel('Resolution [GHz]')
     xlim(safe_range_of_freq/1e9)
-    ylim([-10 230])
+    ylim([0 350])
     legend_resolution_handle = legend('DFT', 'PD', 'ADC', 'Total');
     set(legend_resolution_handle, 'Location', 'NorthEast')
     set(legend_resolution_handle, 'Box', 'on')
